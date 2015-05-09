@@ -39,7 +39,7 @@ findMin (BQ []) = error "findMin: empty list"
 findMin (BQ [t]) = root t
 findMin (BQ (t:ts)) =
     let x = findMin (BQ ts)
-    in if root t < x then root t else x
+    in if root t <= x then root t else x
 
 deleteMin :: Ord a => BinomialQueue a -> BinomialQueue a
 deleteMin (BQ []) = error "deleteMin: empty list"
@@ -48,7 +48,7 @@ deleteMin (BQ ts) =
         getMin [t] = (t, [])
         getMin (t:ts) =
             let (t', ts') = getMin ts
-            in if root t < root t'
+            in if root t <= root t'
                 then (t, ts)
                 else (t', t:ts')
         (Node (x, r, c), ts2) = getMin ts
@@ -63,13 +63,13 @@ rank (Node (_, r, _)) = r
 
 link :: Ord a => Tree a -> Tree a -> Tree a
 link (t1@(Node (x1, r1, c1))) (t2@(Node (x2, r2, c2))) =
-    if x1 < x2
+    if x1 <= x2
         then Node (x1, r1 + 1, t2:c1)
         else Node (x2, r2 + 1, t1:c2)
 
 ins :: Ord a => Tree a -> [Tree a] -> BinomialQueue a
 ins t [] = BQ [t]
 ins t (t':ts) =
-    if rank t < rank t'
+    if rank t <= rank t'
         then BQ (t:t':ts)
         else ins (link t t') ts
