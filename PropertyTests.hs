@@ -89,11 +89,8 @@ prop_InsertingTheSameValueSeveralTimes n x =
         xs = replicate l x
         h = insertValues xs
 
-prop_IsOrderedCorrectly :: [Int] -> Bool
-prop_IsOrderedCorrectly xs =
-    isOrderedCorrectly h
-    where
-        h = insertValues xs
+prop_IsOrderedCorrectly :: BinomialQueue Int -> Bool
+prop_IsOrderedCorrectly h = isOrderedCorrectly h
 
 prop_DeleteMinAfterInsertingTheSameValueSeveralTimes :: Int -> Int -> Bool
 prop_DeleteMinAfterInsertingTheSameValueSeveralTimes n x =
