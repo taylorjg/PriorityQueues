@@ -1,16 +1,16 @@
-module PriorityQueue (
-    BinomialQueue(BQ),
+module BinomialQueue (
+    BinomialQueue,
     empty,
     isEmpty,
     insert,
     meld,
     findMin,
     deleteMin
-    ) where
+) where
 
 type Rank = Int
-data Tree a = Node (a, Rank, [Tree a])
-data BinomialQueue a = BQ [Tree a]
+data Tree a = Node (a, Rank, [Tree a]) deriving (Show)
+data BinomialQueue a = BQ [Tree a] deriving (Show)
 
 empty :: BinomialQueue a
 empty = BQ []
