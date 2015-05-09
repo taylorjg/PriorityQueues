@@ -8,6 +8,16 @@ module BinomialQueue (
     deleteMin
 ) where
 
+import PriorityQueue
+
+instance PriorityQueue BinomialQueue where
+    pqEmpty = empty
+    pqIsEmpty = isEmpty
+    pqInsert = insert
+    pqMeld = meld
+    pqFindMin = findMin
+    pqDeleteMin = deleteMin
+
 type Rank = Int
 data Tree a = Node (a, Rank, [Tree a]) deriving (Show)
 data BinomialQueue a = BQ [Tree a] deriving (Show)
