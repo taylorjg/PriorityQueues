@@ -78,8 +78,6 @@ prop_IsOrderedCorrectly xs =
     where
         h = insertValues xs
 
--- This test currently fails when xs contains the
--- same value repeated >= 6 times (fine for 5 times)
 prop_InsertingTheSameValueSeveralTimes :: Int -> Int -> Bool
 prop_InsertingTheSameValueSeveralTimes n x = 
     getValues h == xs
