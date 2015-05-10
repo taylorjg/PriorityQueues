@@ -139,8 +139,8 @@ prop_InsertingTheSameValueSeveralTimes n x =
         xs = replicate l x
         h = insertValues xs
 
-prop_IsOrderedCorrectly :: BinomialQueue Int -> Bool
-prop_IsOrderedCorrectly h = isOrderedCorrectly h
+prop_IsOrderedCorrectlyPQ :: (Ord a, PriorityQueue pq) => pq a -> Bool
+prop_IsOrderedCorrectlyPQ h = isOrderedCorrectlyPQ h
 
 prop_DeleteMinAfterInsertingTheSameValueSeveralTimes :: Int -> Int -> Bool
 prop_DeleteMinAfterInsertingTheSameValueSeveralTimes n x =
@@ -151,21 +151,16 @@ prop_DeleteMinAfterInsertingTheSameValueSeveralTimes n x =
         h1 = insertValues xs
         h2 = deleteMin h1
 
-prop_IsOrderedCorrectlyAfterMeld :: BinomialQueue Int -> BinomialQueue Int -> Bool
-prop_IsOrderedCorrectlyAfterMeld h1 h2 =
-    isOrderedCorrectly $ meld h1 h2
-
 -- http://austinrochford.com/posts/2014-05-27-quickcheck-laws.html
-prop_ExamplePropertyTestUsingTypeClass :: PriorityQueue pq => pq a -> Bool
-prop_ExamplePropertyTestUsingTypeClass pq = pqIsEmpty pq || (not $ pqIsEmpty pq)
+prop_IsOrderedCorrectlyAfterMeldPQ :: (Ord a, PriorityQueue pq) => pq a -> pq a -> Bool
+prop_IsOrderedCorrectlyAfterMeldPQ h1 h2 = isOrderedCorrectlyPQ $ pqMeld h1 h2
 
 main :: IO ()
 main = do
-    quickCheck (prop_ExamplePropertyTestUsingTypeClass :: BinomialQueue Int -> Bool)
     quickCheck prop_FindMinWhenOnlyOneItem
     quickCheck prop_DeleteMinWhenOnlyOneItem
     quickCheck prop_FindMinWhenTwoItemsReturnsMinOfTwoItems
-    quickCheck prop_IsOrderedCorrectly
+    quickCheck (prop_IsOrderedCorrectlyPQ :: BinomialQueue Int -> Bool)
     quickCheck prop_InsertingTheSameValueSeveralTimes
     quickCheck prop_DeleteMinAfterInsertingTheSameValueSeveralTimes
-    quickCheck prop_IsOrderedCorrectlyAfterMeld
+    quickCheck (prop_IsOrderedCorrectlyAfterMeldPQ :: BinomialQueue Int -> BinomialQueue Int -> Bool)
