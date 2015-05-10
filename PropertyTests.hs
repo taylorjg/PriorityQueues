@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 import Test.QuickCheck
+import PriorityQueue
 import BinomialQueue
 
 instance Arbitrary (BinomialQueue Int) where
@@ -105,8 +106,13 @@ prop_IsOrderedCorrectlyAfterMeld :: BinomialQueue Int -> BinomialQueue Int -> Bo
 prop_IsOrderedCorrectlyAfterMeld h1 h2 =
     isOrderedCorrectly $ meld h1 h2
 
+-- http://austinrochford.com/posts/2014-05-27-quickcheck-laws.html
+prop_ExamplePropertyTestUsingTypeClass :: PriorityQueue pq => pq a -> Bool
+prop_ExamplePropertyTestUsingTypeClass pq = pqIsEmpty pq || (not $ pqIsEmpty pq)
+
 main :: IO ()
 main = do
+    quickCheck (prop_ExamplePropertyTestUsingTypeClass :: BinomialQueue Int -> Bool)
     quickCheck prop_FindMinWhenOnlyOneItem
     quickCheck prop_DeleteMinWhenOnlyOneItem
     quickCheck prop_FindMinWhenTwoItemsReturnsMinOfTwoItems
