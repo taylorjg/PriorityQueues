@@ -25,6 +25,51 @@ genNonEmptyBinomialQueueInt = sized (\size -> do
 genInt :: Gen Int
 genInt = arbitrary
 
+-- *********************************
+-- PriorityQueue variants of helpers
+-- *********************************
+
+insertValuesPQ :: (Ord a, PriorityQueue pq) => [a] -> pq a
+insertValuesPQ xs =
+    loop xs pqEmpty
+    where
+        loop (x:rest) h = loop rest (pqInsert x h)
+        loop _ h = h
+
+getValuesPQ :: (Ord a, PriorityQueue pq) => pq a -> [a]
+getValuesPQ h =
+    reverse $ loop h []
+    where
+        loop h xs = 
+            if pqIsEmpty h
+                then xs
+                else
+                    loop h2 (x:xs)
+                    where
+                        x = pqFindMin h
+                        h2 = pqDeleteMin h
+
+isOrderedCorrectlyPQ :: (Ord a, PriorityQueue pq) => pq a -> Bool
+isOrderedCorrectlyPQ h =
+    case tryGetMin h of
+        Just m -> loop h m
+        _ -> True
+    where
+        tryGetMin h =
+            case pqIsEmpty h of
+                False -> Just $ pqFindMin h
+                True -> Nothing
+        loop h previousMin =
+            case tryGetMin h2 of
+                Just m -> m >= previousMin && loop h2 m
+                _ -> True
+            where
+                h2 = pqDeleteMin h
+
+-- *********************************
+-- BinomialQueue variants of helpers
+-- *********************************
+
 insertValues :: [Int] -> BinomialQueue Int
 insertValues xs =
     loop xs empty
@@ -48,19 +93,23 @@ getValues h =
 isOrderedCorrectly :: BinomialQueue Int -> Bool
 isOrderedCorrectly h =
     case tryGetMin h of
-        (True, m) -> loop h m
+        Just m -> loop h m
         _ -> True
     where
         tryGetMin h =
             case isEmpty h of
-                False -> (True, findMin h)
-                True -> (False, 0)
+                False -> Just $ findMin h
+                True -> Nothing
         loop h previousMin =
             case tryGetMin h2 of
-                (True, m) -> m >= previousMin && loop h2 m
+                Just m -> m >= previousMin && loop h2 m
                 _ -> True
             where
                 h2 = deleteMin h
+
+-- **************
+-- Property tests
+-- **************
 
 prop_FindMinWhenOnlyOneItem :: Int -> Bool
 prop_FindMinWhenOnlyOneItem x = 
