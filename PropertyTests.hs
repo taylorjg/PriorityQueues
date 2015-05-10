@@ -86,23 +86,6 @@ getValues h =
                         x = findMin h
                         h2 = deleteMin h
 
---isOrderedCorrectly :: Ord a => BinomialQueue a -> Bool
---isOrderedCorrectly h =
---    case tryGetMin h of
---        Just m -> loop h m
---        _ -> True
---    where
---        tryGetMin h =
---            case isEmpty h of
---                False -> Just $ findMin h
---                True -> Nothing
---        loop h previousMin =
---            case tryGetMin h2 of
---                Just m -> m >= previousMin && loop h2 m
---                _ -> True
---            where
---                h2 = deleteMin h
-
 -- **************
 -- Property tests
 -- **************
@@ -157,5 +140,9 @@ main = do
     quickCheck prop_FindMinWhenTwoItemsReturnsMinOfTwoItems
     quickCheck prop_InsertingTheSameValueSeveralTimes
     quickCheck prop_DeleteMinAfterInsertingTheSameValueSeveralTimes
+
     quickCheck (prop_IsOrderedCorrectlyPQ :: BinomialQueue Int -> Bool)
+    quickCheck (prop_IsOrderedCorrectlyPQ :: BinomialQueue Char -> Bool)
+    
     quickCheck (prop_IsOrderedCorrectlyAfterMeldPQ :: BinomialQueue Int -> BinomialQueue Int -> Bool)
+    quickCheck (prop_IsOrderedCorrectlyAfterMeldPQ :: BinomialQueue Char -> BinomialQueue Char -> Bool)
