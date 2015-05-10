@@ -1,29 +1,25 @@
-{-# LANGUAGE FlexibleInstances #-}
-
 import Test.QuickCheck
 import PriorityQueue
 import BinomialQueue
 
-instance Arbitrary (BinomialQueue Int) where
-    arbitrary = genBinomialQueueInt
+instance (Ord a, Arbitrary a) => Arbitrary (BinomialQueue a) where
+    arbitrary = genBinomialQueue
 
-genBinomialQueueInt :: Gen (BinomialQueue Int)
-genBinomialQueueInt =
+genBinomialQueue :: (Ord a, Arbitrary a) => Gen (BinomialQueue a)
+genBinomialQueue =
     frequency [
-        (1, genEmptyBinomialQueueInt),
-        (9, genNonEmptyBinomialQueueInt)
+        (1, genEmptyBinomialQueue),
+        (9, genNonEmptyBinomialQueue)
     ]
 
-genEmptyBinomialQueueInt :: Gen (BinomialQueue Int)
-genEmptyBinomialQueueInt = return empty
+genEmptyBinomialQueue :: (Ord a, Arbitrary a) => Gen (BinomialQueue a)
+genEmptyBinomialQueue = return empty
 
-genNonEmptyBinomialQueueInt :: Gen (BinomialQueue Int)
-genNonEmptyBinomialQueueInt = sized (\size -> do
-    xs <- vectorOf size genInt
+genNonEmptyBinomialQueue :: (Ord a, Arbitrary a) => Gen (BinomialQueue a)
+genNonEmptyBinomialQueue = sized (\size -> do
+    let genA = arbitrary :: (Arbitrary a) => Gen a
+    xs <- vectorOf size genA
     return $ insertValues xs)
-
-genInt :: Gen Int
-genInt = arbitrary
 
 -- *********************************
 -- PriorityQueue variants of helpers
@@ -70,14 +66,14 @@ isOrderedCorrectlyPQ h =
 -- BinomialQueue variants of helpers
 -- *********************************
 
-insertValues :: [Int] -> BinomialQueue Int
+insertValues :: Ord a => [a] -> BinomialQueue a
 insertValues xs =
     loop xs empty
     where
         loop (x:rest) h = loop rest (insert x h)
         loop _ h = h
 
-getValues :: BinomialQueue Int -> [Int]
+getValues :: Ord a => BinomialQueue a -> [a]
 getValues h =
     reverse $ loop h []
     where
@@ -90,22 +86,22 @@ getValues h =
                         x = findMin h
                         h2 = deleteMin h
 
-isOrderedCorrectly :: BinomialQueue Int -> Bool
-isOrderedCorrectly h =
-    case tryGetMin h of
-        Just m -> loop h m
-        _ -> True
-    where
-        tryGetMin h =
-            case isEmpty h of
-                False -> Just $ findMin h
-                True -> Nothing
-        loop h previousMin =
-            case tryGetMin h2 of
-                Just m -> m >= previousMin && loop h2 m
-                _ -> True
-            where
-                h2 = deleteMin h
+--isOrderedCorrectly :: Ord a => BinomialQueue a -> Bool
+--isOrderedCorrectly h =
+--    case tryGetMin h of
+--        Just m -> loop h m
+--        _ -> True
+--    where
+--        tryGetMin h =
+--            case isEmpty h of
+--                False -> Just $ findMin h
+--                True -> Nothing
+--        loop h previousMin =
+--            case tryGetMin h2 of
+--                Just m -> m >= previousMin && loop h2 m
+--                _ -> True
+--            where
+--                h2 = deleteMin h
 
 -- **************
 -- Property tests
@@ -139,9 +135,6 @@ prop_InsertingTheSameValueSeveralTimes n x =
         xs = replicate l x
         h = insertValues xs
 
-prop_IsOrderedCorrectlyPQ :: (Ord a, PriorityQueue pq) => pq a -> Bool
-prop_IsOrderedCorrectlyPQ h = isOrderedCorrectlyPQ h
-
 prop_DeleteMinAfterInsertingTheSameValueSeveralTimes :: Int -> Int -> Bool
 prop_DeleteMinAfterInsertingTheSameValueSeveralTimes n x =
     getValues h2 == drop 1 xs
@@ -151,7 +144,9 @@ prop_DeleteMinAfterInsertingTheSameValueSeveralTimes n x =
         h1 = insertValues xs
         h2 = deleteMin h1
 
--- http://austinrochford.com/posts/2014-05-27-quickcheck-laws.html
+prop_IsOrderedCorrectlyPQ :: (Ord a, PriorityQueue pq) => pq a -> Bool
+prop_IsOrderedCorrectlyPQ h = isOrderedCorrectlyPQ h
+
 prop_IsOrderedCorrectlyAfterMeldPQ :: (Ord a, PriorityQueue pq) => pq a -> pq a -> Bool
 prop_IsOrderedCorrectlyAfterMeldPQ h1 h2 = isOrderedCorrectlyPQ $ pqMeld h1 h2
 
@@ -160,7 +155,7 @@ main = do
     quickCheck prop_FindMinWhenOnlyOneItem
     quickCheck prop_DeleteMinWhenOnlyOneItem
     quickCheck prop_FindMinWhenTwoItemsReturnsMinOfTwoItems
-    quickCheck (prop_IsOrderedCorrectlyPQ :: BinomialQueue Int -> Bool)
     quickCheck prop_InsertingTheSameValueSeveralTimes
     quickCheck prop_DeleteMinAfterInsertingTheSameValueSeveralTimes
+    quickCheck (prop_IsOrderedCorrectlyPQ :: BinomialQueue Int -> Bool)
     quickCheck (prop_IsOrderedCorrectlyAfterMeldPQ :: BinomialQueue Int -> BinomialQueue Int -> Bool)
